@@ -14,7 +14,7 @@ This guide explains how to install NeMo Automodel for LLM, VLM, and OMNI models 
 
 ### System Requirements
 - **Python**: 3.9 or higher
-- **CUDA**: 11.8 or higher (for GPU support)
+- **CUDA driver**: 11.8 or higher (for GPU support). You need the NVIDIA driver with CUDA runtime support; the CUDA toolkit (`nvcc`) is not required for inference or fine-tuning because PyTorch ships its own CUDA libraries. Verify with `nvidia-smi`.
 - **Memory**: Minimum 16GB RAM, 32GB+ recommended
 - **Storage**: At least 50GB free space for models and datasets
 
@@ -40,6 +40,18 @@ This installs the latest stable release of NeMo Automodel from PyPI.
 To verify the install, run `python -c "import nemo_automodel; print(nemo_automodel.__version__)"`. See [nemo-automodel on PyPI](https://pypi.org/project/nemo-automodel/).
 :::
 
+:::{note}
+If you see warnings about scripts installed to a directory that is not
+on `PATH` (for example, `~/.local/bin`), add that directory to your
+shell's `PATH`:
+
+```bash
+export PATH="$HOME/.local/bin:$PATH"
+```
+
+Add this line to your `~/.bashrc` or `~/.zshrc` to make it permanent.
+:::
+
 ### Install via NeMo Docker Container
 You can use NeMo Automodel with the NeMo Docker container. Pull the container by running:
 ```bash
@@ -47,6 +59,14 @@ docker pull nvcr.io/nvidia/nemo-automodel:25.11.00
 ```
 :::{note}
 The above `docker` command uses the [`25.11.00`](https://catalog.ngc.nvidia.com/orgs/nvidia/containers/nemo-automodel?version=25.11.00) container. Use the [most recent container](https://catalog.ngc.nvidia.com/orgs/nvidia/containers/nemo-automodel) version to ensure you get the latest version of Automodel and its dependencies like torch, transformers, etc.
+
+The container version of NeMo Automodel may differ from the latest PyPI
+release because containers follow a separate release cadence. To check
+the version inside the container, run:
+
+```bash
+python -c "import nemo_automodel; print(nemo_automodel.__version__)"
+```
 :::
 
 Then you can enter the container using:
@@ -84,36 +104,62 @@ To contribute or modify the code:
 ```bash
 git clone https://github.com/NVIDIA-NeMo/Automodel.git
 cd Automodel
+pip3 install --upgrade pip setuptools
 pip3 install -e .
 ```
 
 :::{note}
-This installs Automodel in editable mode, so changes to the code are immediately reflected in Python.
+This installs Automodel in editable mode, so changes to the code are
+immediately reflected in Python.
+
+The `pip3 install --upgrade pip setuptools` step is required because
+editable installs use [PEP 660](https://peps.python.org/pep-0660/),
+which needs `pip >= 21.3` and `setuptools >= 64.0`. If you skip this
+step on a system with an older pip, you may see an error about a
+missing `build_editable` hook.
+
+Alternatively, you can use `uv` which handles this automatically:
+
+```bash
+uv pip install -e .
+```
 :::
 
 ### Mount the Repo into a NeMo Docker Container
 To run `Automodel` inside a NeMo container while **mounting your local repo**, follow these steps:
 
+**Step 1**: Clone the Automodel repository.
+
 ```bash
-# Step 1: Clone the Automodel repository.
-git clone https://github.com/NVIDIA-NeMo/Automodel.git && cd Automodel && \
-
-# Step 2: Pull the latest compatible NeMo container (replace `25.11.00` with [latest](https://catalog.ngc.nvidia.com/orgs/nvidia/containers/nemo-automodel?version=25.11.00) if needed).
-docker pull nvcr.io/nvidia/nemo-automodel:25.11.00 && \
-
-# Step 3: Run the NeMo container with GPU support, shared memory, and mount the repo.
-docker run --gpus all -it --rm \
-  -v $(pwd):/workspace/Automodel \         # Mount repo into container workspace
-  -v $(pwd)/Automodel:/opt/Automodel \     # Optional: Mount Automodel under /opt for flexibility
-  --shm-size=8g \                           # Increase shared memory for PyTorch/data loading
-  nvcr.io/nvidia/nemo-automodel:25.11.00 /bin/bash -c "\
-    cd /workspace/Automodel && \           # Enter the mounted repo
-    pip install -e . && \                  # Install Automodel in editable mode
-    python3 examples/llm/finetune.py" # Run a usage example
+git clone https://github.com/NVIDIA-NeMo/Automodel.git
+cd Automodel
 ```
+
+**Step 2**: Pull the latest compatible NeMo container. Replace
+`25.11.00` with the
+[latest version](https://catalog.ngc.nvidia.com/orgs/nvidia/containers/nemo-automodel)
+if needed.
+
+```bash
+docker pull nvcr.io/nvidia/nemo-automodel:25.11.00
+```
+
+**Step 3**: Run the NeMo container with GPU support, shared memory,
+and mount the repo.
+
+```bash
+docker run --gpus all -it --rm \
+  -v $(pwd):/workspace/Automodel \
+  --shm-size=8g \
+  nvcr.io/nvidia/nemo-automodel:25.11.00 /bin/bash -c \
+    "cd /workspace/Automodel && pip install -e . && python3 examples/llm/finetune.py"
+```
+
 :::{note}
-The above `docker` command uses the volume `-v` option to mount the local `Automodel` directory
-under `/opt/Automodel`.
+The `-v $(pwd):/workspace/Automodel` option mounts your local clone
+into the container so that code changes on the host are reflected
+immediately. The `--shm-size=8g` flag increases shared memory, which
+PyTorch data loaders require for multi-worker loading.
 :::
 
 ## Bonus: Install Extras

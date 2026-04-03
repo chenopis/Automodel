@@ -1,0 +1,220 @@
+=== [2026-04-01 03:33:45] T0-prereq-check ===
+$ ssh automodel-install-test "uname -a && nvidia-smi --query-gpu=name,memory.total --format=csv,noheader && python3 --version && docker --version"
+Linux shadecloud 6.8.0-90-generic #91~22.04.1-Ubuntu SMP PREEMPT_DYNAMIC Thu Nov 20 15:20:45 UTC 2 x86_64 x86_64 x86_64 GNU/Linux
+NVIDIA RTX A6000, 49140 MiB
+Python 3.10.12
+Docker version 29.1.5, build 0e6fee6
+
+=== [2026-04-01 03:33:50] T0-prereq-cuda-pip-git ===
+$ ssh automodel-install-test "nvcc --version; nvidia-smi | head -3; pip3 --version; which git && git --version; free -h | head -2; df -h / | tail -1"
+nvcc not found
+Wed Apr  1 10:33:45 2026
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 580.126.09             Driver Version: 580.126.09     CUDA Version: 13.0     |
+pip 22.0.2 from /usr/lib/python3/dist-packages/pip (python 3.10)
+/usr/bin/git
+git version 2.34.1
+               total        used        free      shared  buff/cache   available
+Mem:            47Gi       723Mi        44Gi       5.0Mi       1.6Gi        45Gi
+/dev/sda2       251G   15G  227G   6% /
+
+=== [2026-04-01 03:34:05] T0-rsync-repo ===
+$ rsync -avz --exclude '.git' ... /Users/andrewch/repos/Automodel/ automodel-install-test:~/Automodel/
+(completed in 7.9s, exit 0)
+
+=== [2026-04-01 03:36:01] T1-PyPI-install ===
+$ ssh automodel-install-test "pip3 install nemo-automodel"
+(running...)
+=== [2026-04-01 03:34:28] T1-PyPI-install ===
+$ ssh automodel-install-test 'pip3 install nemo-automodel 2>&1 | tail -20 && python3 -c '"'"'import nemo_automodel; print(nemo_automodel.__version__)'"'"' 2>&1'
+  Consider adding this directory to PATH or, if you prefer to suppress this warning, use --no-warn-script-location.
+  WARNING: The script httpx is installed in '/home/shadeform/.local/bin' which is not on PATH.
+  Consider adding this directory to PATH or, if you prefer to suppress this warning, use --no-warn-script-location.
+  WARNING: The scripts hf and tiny-agents are installed in '/home/shadeform/.local/bin' which is not on PATH.
+  Consider adding this directory to PATH or, if you prefer to suppress this warning, use --no-warn-script-location.
+  WARNING: The script fastapi is installed in '/home/shadeform/.local/bin' which is not on PATH.
+  Consider adding this directory to PATH or, if you prefer to suppress this warning, use --no-warn-script-location.
+  WARNING: The script mlflow is installed in '/home/shadeform/.local/bin' which is not on PATH.
+  Consider adding this directory to PATH or, if you prefer to suppress this warning, use --no-warn-script-location.
+  WARNING: The script diffusers-cli is installed in '/home/shadeform/.local/bin' which is not on PATH.
+  Consider adding this directory to PATH or, if you prefer to suppress this warning, use --no-warn-script-location.
+  WARNING: The script datasets-cli is installed in '/home/shadeform/.local/bin' which is not on PATH.
+  Consider adding this directory to PATH or, if you prefer to suppress this warning, use --no-warn-script-location.
+  WARNING: The script transformers is installed in '/home/shadeform/.local/bin' which is not on PATH.
+  Consider adding this directory to PATH or, if you prefer to suppress this warning, use --no-warn-script-location.
+  WARNING: The script mlflow is installed in '/home/shadeform/.local/bin' which is not on PATH.
+  Consider adding this directory to PATH or, if you prefer to suppress this warning, use --no-warn-script-location.
+  WARNING: The script automodel is installed in '/home/shadeform/.local/bin' which is not on PATH.
+  Consider adding this directory to PATH or, if you prefer to suppress this warning, use --no-warn-script-location.
+Successfully installed Flask-3.1.3 Flask-CORS-6.0.2 Mako-1.3.10 Pillow-12.1.1 aiohappyeyeballs-2.6.1 aiohttp-3.13.5 aiosignal-1.4.0 alembic-1.18.4 annotated-doc-0.0.4 annotated-types-0.7.0 anyio-4.13.0 async-timeout-5.0.1 blinker-1.9.0 cffi-2.0.0 click-8.3.1 cloudpickle-3.1.2 contourpy-1.3.2 cryptography-46.0.6 cuda-bindings-12.9.4 cuda-pathfinder-1.5.0 cycler-0.12.1 databricks-sdk-0.102.0 datasets-4.8.4 diffusers-0.37.1 dill-0.4.1 einops-0.8.2 exceptiongroup-1.3.1 fastapi-0.135.2 filelock-3.25.2 fonttools-4.62.1 frozenlist-1.8.0 fsspec-2026.2.0 ftfy-6.3.1 gitdb-4.0.12 gitpython-3.1.46 google-auth-2.49.1 graphene-3.4.3 graphql-core-3.2.8 graphql-relay-3.2.0 greenlet-3.3.2 gunicorn-25.3.0 h11-0.16.0 hf-xet-1.4.3 httpcore-1.0.9 httpx-0.28.1 huey-2.6.0 huggingface-hub-1.8.0 imageio-ffmpeg-0.6.0 importlib-metadata-8.7.1 itsdangerous-2.2.0 jinja2-3.1.6 joblib-1.5.3 kiwisolver-1.5.0 markdown-it-py-4.0.0 markupsafe-3.0.3 matplotlib-3.10.8 mdurl-0.1.2 megatron-fsdp-0.3.1 mlflow-3.10.1 mlflow-skinny-3.10.1 mlflow-tracing-3.10.1 mpmath-1.3.0 multidict-6.7.1 multiprocess-0.70.19 nemo-automodel-0.3.0 networkx-3.4.2 numpy-2.2.6 nvidia-cublas-cu12-12.8.4.1 nvidia-cuda-cupti-cu12-12.8.90 nvidia-cuda-nvrtc-cu12-12.8.93 nvidia-cuda-runtime-cu12-12.8.90 nvidia-cudnn-cu12-9.10.2.21 nvidia-cufft-cu12-11.3.3.83 nvidia-cufile-cu12-1.13.1.3 nvidia-curand-cu12-10.3.9.90 nvidia-cusolver-cu12-11.7.3.90 nvidia-cusparse-cu12-12.5.8.93 nvidia-cusparselt-cu12-0.7.1 nvidia-nccl-cu12-2.27.5 nvidia-nvjitlink-cu12-12.8.93 nvidia-nvshmem-cu12-3.4.5 nvidia-nvtx-cu12-12.8.90 opencv-python-headless-4.10.0.84 opentelemetry-api-1.40.0 opentelemetry-proto-1.40.0 opentelemetry-sdk-1.40.0 opentelemetry-semantic-conventions-0.61b0 pandas-2.3.3 platformdirs-4.9.4 prettytable-3.17.0 propcache-0.4.1 protobuf-6.33.6 pyarrow-23.0.1 pybind11-3.0.3 pycparser-3.0 pydantic-2.12.5 pydantic-core-2.41.5 pygments-2.20.0 pyparsing-3.3.2 python-dateutil-2.9.0.post0 python-dotenv-1.2.2 regex-2026.3.32 rich-14.3.3 safetensors-0.7.0 scikit-learn-1.7.2 scipy-1.15.3 sentry-sdk-2.57.0 shellingham-1.5.4 skops-0.13.0 smmap-5.0.3 sqlalchemy-2.0.48 sqlparse-0.5.5 starlette-1.0.0 sympy-1.14.0 threadpoolctl-3.6.0 tokenizers-0.22.2 tomli-2.4.1 torch-2.10.0 torchao-0.17.0 torchdata-0.11.0 tqdm-4.67.3 transformers-5.4.0 triton-3.6.0 typer-0.24.1 typing-extensions-4.15.0 typing-inspection-0.4.2 tzdata-2025.3 urllib3-2.6.3 uvicorn-0.42.0 wandb-0.25.1 wcwidth-0.6.0 werkzeug-3.1.7 xxhash-3.6.0 yarl-1.23.0 zipp-3.23.0
+0.3.0
+Pseudo-terminal will not be allocated because stdin is not a terminal.
+Warning: Permanently added '216.81.248.157' (ED25519) to the list of known hosts.
+=== END (exit 0) ===
+
+=== [2026-04-01 03:40:42] T1-PyPI-install-result ===
+$ ssh automodel-install-test "pip3 install nemo-automodel"
+exit 0 (269s)
+Installed: nemo-automodel-0.3.0, torch-2.10.0, transformers-5.4.0, cuda-bindings-12.9.4
+PATH warnings: scripts installed to /home/shadeform/.local/bin (not on PATH)
+
+=== [2026-04-01 03:40:52] T1-PyPI-verify ===
+$ python -c "import nemo_automodel; print(nemo_automodel.__version__)"
+Pseudo-terminal will not be allocated because stdin is not a terminal.
+Warning: Permanently added '216.81.248.157' (ED25519) to the list of known hosts.
+0.3.0
+exit_code: 0
+
+=== [2026-04-01 03:41:13] T2-editable-install ===
+$ cd ~/Automodel && pip3 install -e .
+Pseudo-terminal will not be allocated because stdin is not a terminal.
+Warning: Permanently added '216.81.248.157' (ED25519) to the list of known hosts.
+WARNING: The directory '/ephemeral/cache/pip' or its parent directory is not owned or is not writable by the current user. The cache has been disabled. Check the permissions and owner of that directory. If executing pip with sudo, you should use sudo's -H flag.
+Defaulting to user installation because normal site-packages is not writeable
+Looking in indexes: https://mcache-dsm.massedcompute.com/simple, https://pypi.org/simple
+Obtaining file:///home/shadeform/Automodel
+  Installing build dependencies: started
+  Installing build dependencies: finished with status 'done'
+  Checking if build backend supports build_editable: started
+  Checking if build backend supports build_editable: finished with status 'done'
+ERROR: Project file:///home/shadeform/Automodel has a 'pyproject.toml' and its build backend is missing the 'build_editable' hook. Since it does not have a 'setup.py' nor a 'setup.cfg', it cannot be installed in editable mode. Consider using a build backend that supports PEP 660.
+exit_code: 0
+
+=== [2026-04-01 03:41:46] T3-git-source-install ===
+$ pip3 install git+https://github.com/NVIDIA/NeMo-Automodel.git
+Pseudo-terminal will not be allocated because stdin is not a terminal.
+Warning: Permanently added '216.81.248.157' (ED25519) to the list of known hosts.
+  Preparing metadata (pyproject.toml): started
+  Preparing metadata (pyproject.toml): finished with status 'done'
+Building wheels for collected packages: UNKNOWN
+  Building wheel for UNKNOWN (pyproject.toml): started
+  Building wheel for UNKNOWN (pyproject.toml): finished with status 'done'
+  Created wheel for UNKNOWN: filename=UNKNOWN-0.0.0-py3-none-any.whl size=5111 sha256=94a2646446f6b865ccba861675c94846795139e1f035b73e81df6d60822a088d
+  Stored in directory: /tmp/pip-ephem-wheel-cache-dr0i_w6_/wheels/92/de/8d/38663e0d6191413af40d5768fb897553b98a5c6eee7d26ba40
+Successfully built UNKNOWN
+Installing collected packages: UNKNOWN
+Successfully installed UNKNOWN-0.0.0
+exit_code: 0
+
+=== [2026-04-01 03:42:29] T3-git-source-install-RETRY (correct URL) ===
+$ pip3 install git+https://github.com/NVIDIA-NeMo/Automodel.git
+Pseudo-terminal will not be allocated because stdin is not a terminal.
+Warning: Permanently added '216.81.248.157' (ED25519) to the list of known hosts.
+WARNING: The directory '/ephemeral/cache/pip' or its parent directory is not owned or is not writable by the current user. The cache has been disabled. Check the permissions and owner of that directory. If executing pip with sudo, you should use sudo's -H flag.
+Defaulting to user installation because normal site-packages is not writeable
+Looking in indexes: https://mcache-dsm.massedcompute.com/simple, https://pypi.org/simple
+Collecting git+https://github.com/NVIDIA-NeMo/Automodel.git
+  Cloning https://github.com/NVIDIA-NeMo/Automodel.git to /tmp/pip-req-build-xx01gfb0
+  Running command git clone --filter=blob:none --quiet https://github.com/NVIDIA-NeMo/Automodel.git /tmp/pip-req-build-xx01gfb0
+  Resolved https://github.com/NVIDIA-NeMo/Automodel.git to commit fedc9d2b1e771fdb3dd28e596c7863814284b0f1
+  Installing build dependencies: started
+  Installing build dependencies: finished with status 'done'
+  Getting requirements to build wheel: started
+  Getting requirements to build wheel: finished with status 'done'
+  Installing backend dependencies: started
+  Installing backend dependencies: finished with status 'done'
+  Preparing metadata (pyproject.toml): started
+  Preparing metadata (pyproject.toml): finished with status 'done'
+exit_code: 0
+
+=== [2026-04-01 03:43:02] T3-git-source-verify ===
+$ python3 -c "import nemo_automodel; print(nemo_automodel.__version__)"
+Pseudo-terminal will not be allocated because stdin is not a terminal.
+Warning: Permanently added '216.81.248.157' (ED25519) to the list of known hosts.
+0.3.0
+exit_code: 0
+
+=== [2026-04-01 03:43:28] T4-docker-pull ===
+$ docker pull nvcr.io/nvidia/nemo-automodel:25.11.00
+
+=== [2026-04-01 03:43:40] T5-extras-cli ===
+$ pip3 install nemo-automodel[cli]
+Pseudo-terminal will not be allocated because stdin is not a terminal.
+Warning: Permanently added '216.81.248.157' (ED25519) to the list of known hosts.
+Requirement already satisfied: google-auth~=2.0 in ./.local/lib/python3.10/site-packages (from databricks-sdk<1,>=0.20.0->mlflow-skinny==3.10.1->mlflow->nemo-automodel[cli]) (2.49.1)
+Requirement already satisfied: starlette>=0.46.0 in ./.local/lib/python3.10/site-packages (from fastapi<1->mlflow-skinny==3.10.1->mlflow->nemo-automodel[cli]) (1.0.0)
+Requirement already satisfied: smmap<6,>=3.0.1 in ./.local/lib/python3.10/site-packages (from gitdb<5,>=4.0.1->gitpython<4,>=3.1.9->mlflow-skinny==3.10.1->mlflow->nemo-automodel[cli]) (5.0.3)
+Requirement already satisfied: opentelemetry-semantic-conventions==0.61b0 in ./.local/lib/python3.10/site-packages (from opentelemetry-sdk<3,>=1.9.0->mlflow-skinny==3.10.1->mlflow->nemo-automodel[cli]) (0.61b0)
+Requirement already satisfied: six>=1.5 in /usr/lib/python3/dist-packages (from python-dateutil<3,>=2.7.0->graphene<4->mlflow->nemo-automodel[cli]) (1.16.0)
+Requirement already satisfied: pygments<3.0.0,>=2.13.0 in ./.local/lib/python3.10/site-packages (from rich>=12.3.0->typer->transformers>=5.0.0->nemo-automodel[cli]) (2.20.0)
+Requirement already satisfied: markdown-it-py>=2.2.0 in ./.local/lib/python3.10/site-packages (from rich>=12.3.0->typer->transformers>=5.0.0->nemo-automodel[cli]) (4.0.0)
+Requirement already satisfied: exceptiongroup>=1.0.2 in ./.local/lib/python3.10/site-packages (from anyio->httpx<1.0.0->datasets>=4.0.0->nemo-automodel[cli]) (1.3.1)
+Requirement already satisfied: pyasn1-modules>=0.2.1 in /usr/lib/python3/dist-packages (from google-auth~=2.0->databricks-sdk<1,>=0.20.0->mlflow-skinny==3.10.1->mlflow->nemo-automodel[cli]) (0.2.1)
+Requirement already satisfied: mdurl~=0.1 in ./.local/lib/python3.10/site-packages (from markdown-it-py>=2.2.0->rich>=12.3.0->typer->transformers>=5.0.0->nemo-automodel[cli]) (0.1.2)
+exit_code: 0
+
+=== [2026-04-01 03:43:46] T5-extras-vlm ===
+$ pip3 install nemo-automodel[vlm]
+Pseudo-terminal will not be allocated because stdin is not a terminal.
+Warning: Permanently added '216.81.248.157' (ED25519) to the list of known hosts.
+Installing collected packages: simsimd, torchcodec, stringzilla, soxr, rpds-py, pycountry, msgpack, llvmlite, lazy_loader, decord, decorator, backoff, av, audioread, attrs, tiktoken, soundfile, referencing, qwen-vl-utils, pooch, numba, albucore, pydantic-extra-types, librosa, jsonschema-specifications, albumentations, torchvision, qwen-omni-utils, jsonschema, timm, mistral_common, open-clip-torch
+  WARNING: The scripts sz_split and sz_wc are installed in '/home/shadeform/.local/bin' which is not on PATH.
+  Consider adding this directory to PATH or, if you prefer to suppress this warning, use --no-warn-script-location.
+  WARNING: The script pyav is installed in '/home/shadeform/.local/bin' which is not on PATH.
+  Consider adding this directory to PATH or, if you prefer to suppress this warning, use --no-warn-script-location.
+  WARNING: The script jsonschema is installed in '/home/shadeform/.local/bin' which is not on PATH.
+  Consider adding this directory to PATH or, if you prefer to suppress this warning, use --no-warn-script-location.
+  WARNING: The script mistral_common is installed in '/home/shadeform/.local/bin' which is not on PATH.
+  Consider adding this directory to PATH or, if you prefer to suppress this warning, use --no-warn-script-location.
+Successfully installed albucore-0.0.24 albumentations-2.0.8 attrs-26.1.0 audioread-3.1.0 av-17.0.0 backoff-2.2.1 decorator-5.2.1 decord-0.6.0 jsonschema-4.26.0 jsonschema-specifications-2025.9.1 lazy_loader-0.5 librosa-0.11.0 llvmlite-0.47.0 mistral_common-1.10.0 msgpack-1.1.2 numba-0.65.0 open-clip-torch-3.3.0 pooch-1.9.0 pycountry-26.2.16 pydantic-extra-types-2.11.1 qwen-omni-utils-0.0.9 qwen-vl-utils-0.0.14 referencing-0.37.0 rpds-py-0.30.0 simsimd-6.5.16 soundfile-0.13.1 soxr-1.0.0 stringzilla-4.6.0 tiktoken-0.12.0 timm-1.0.22 torchcodec-0.11.0 torchvision-0.25.0
+exit_code: 0
+Pseudo-terminal will not be allocated because stdin is not a terminal.
+Warning: Permanently added '216.81.248.157' (ED25519) to the list of known hosts.
+9f0e62f08c13: Pull complete
+88f501380739: Pull complete
+d0b2d1c6ead7: Pull complete
+9ef43dd8ba49: Pull complete
+793068548fb6: Pull complete
+f4f5c40cb2d8: Pull complete
+2597707060de: Pull complete
+8a990f78d120: Pull complete
+84326b7701db: Pull complete
+2deef15fb3ae: Pull complete
+70d5962eb535: Pull complete
+14506c4547d5: Pull complete
+567b9323b104: Pull complete
+3c6b757945a2: Pull complete
+6c65ea1f4181: Pull complete
+0cc635d174b4: Pull complete
+97daab6d2a50: Pull complete
+Digest: sha256:c4f613005518d520c2ac3d9206d95617a2385f86cf8aa09582aad8d35957e2f2
+Status: Downloaded newer image for nvcr.io/nvidia/nemo-automodel:25.11.00
+nvcr.io/nvidia/nemo-automodel:25.11.00
+exit_code: 0
+
+=== [2026-04-01 03:48:58] T4-docker-run-verify ===
+$ docker run --gpus all -it --rm --shm-size=8g nvcr.io/nvidia/nemo-automodel:25.11.00 python3 -c "import nemo_automodel; print(nemo_automodel.__version__)"
+Pseudo-terminal will not be allocated because stdin is not a terminal.
+Warning: Permanently added '216.81.248.157' (ED25519) to the list of known hosts.
+
+=============
+== PyTorch ==
+=============
+
+NVIDIA Release 25.09 (build 237338373)
+PyTorch Version 2.9.0a0+50eac81
+Container image Copyright (c) 2025, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+Copyright (c) 2014-2024 Facebook Inc.
+Copyright (c) 2011-2014 Idiap Research Institute (Ronan Collobert)
+Copyright (c) 2012-2014 Deepmind Technologies    (Koray Kavukcuoglu)
+Copyright (c) 2011-2012 NEC Laboratories America (Koray Kavukcuoglu)
+Copyright (c) 2011-2013 NYU                      (Clement Farabet)
+Copyright (c) 2006-2010 NEC Laboratories America (Ronan Collobert, Leon Bottou, Iain Melvin, Jason Weston)
+Copyright (c) 2006      Idiap Research Institute (Samy Bengio)
+Copyright (c) 2001-2004 Idiap Research Institute (Ronan Collobert, Samy Bengio, Johnny Mariethoz)
+Copyright (c) 2015      Google Inc.
+Copyright (c) 2015      Yangqing Jia
+Copyright (c) 2013-2016 The Caffe contributors
+All rights reserved.
+
+Various files include modifications (c) NVIDIA CORPORATION & AFFILIATES.  All rights reserved.
+
+GOVERNING TERMS: The software and materials are governed by the NVIDIA Software License Agreement
+(found at https://www.nvidia.com/en-us/agreements/enterprise-software/nvidia-software-license-agreement/)
+and the Product-Specific Terms for NVIDIA AI Products
+(found at https://www.nvidia.com/en-us/agreements/enterprise-software/product-specific-terms-for-ai-products/).
+
+/usr/local/lib/python3.12/dist-packages/torch/cuda/__init__.py:63: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+0.2.0rc0
+exit_code: 0
